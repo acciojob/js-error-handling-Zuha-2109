@@ -1,43 +1,41 @@
 //your code here
+class OutOfRangeError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'OutOfRangeError';
+  }
+}
+
 class InvalidExprError extends Error {
   constructor(message) {
     super(message);
-    this.name = "InvalidExprError";
+    this.name = 'InvalidExprError';
   }
 }
 
-class PropertyRequiredError extends InvalidExprError {
-  constructor(property) {
-    super("No property: " + property);
-    this.name = "PropertyRequiredError";
-    this.property = property;
-  }
-}
-function readUser(json) {
-  let user = JSON.parse(json);
+function evalString(expr) {
+  try {
+    // Check for invalid operator combinations
+    if (/\+\+|--|\+\-|-\+|\*\/|\/\*/.test(expr)) {
+      throw new InvalidExprError('Expression should not have an invalid combination of operators');
+    }
 
-  if (!user.age) {
-    throw new PropertyRequiredError("age");
-  }
-  if (!user.name) {
-    throw new PropertyRequiredError("Expression should not have an invalid combination of expression");
-  }
+    // Check for invalid start and end operators
+    if (/^[+/*]/.test(expr)) {
+      throw new SyntaxError('Expression should not start with invalid operator');
+    }
+    if (/[\+\-*/]$/.test(expr)) {
+      throw new SyntaxError('Expression should not end with invalid operator');
+    }
 
-  return user;
-}
+    // Check for valid expression format
+    if (!/^[-+*/\d\s()]+$/.test(expr)) {
+      throw new OutOfRangeError('Expression should only consist of integers and +-/* characters');
+    }
 
-// Working example with try..catch
-
-try {
-  let user = readUser('{ "age": 25 }');
-} catch (err) {
-  if (err instanceof InvalidExprError) {
-    alert("Invalid data: " + err.message); // Invalid data: No property: name
-    alert(err.name); // PropertyRequiredError
-    alert(err.property); // name
-  } else if (err instanceof SyntaxError) {
-    alert("Expression should not have an invalid combination of expression: " + err.message);
-  } else {
-    throw err; // unknown error, rethrow it
+    // Evaluate the expression
+    return eval(expr);
+  } catch (error) {
+    throw error;
   }
 }
