@@ -1,11 +1,10 @@
 class OutOfRangeError extends Error {
-  constructor(arg) {
-    super(`Expression should only consist of integers and +-/* characters and not < arg >`);
+  constructor() {
+    super("Expression should only consist of integers and +-/* characters");
     this.name = "OutOfRangeError";
   }
 }
 
-// Define InvalidExprError class
 class InvalidExprError extends Error {
   constructor() {
     super("Expression should not have an invalid combination of expression");
@@ -13,39 +12,31 @@ class InvalidExprError extends Error {
   }
 }
 
-// Define evalString function
-function evalString() {
-  const expression = document.getElementById("expression").value;
-  try {
-    // Check for invalid expression combinations
-    if (/[+\-*/]{2,}/.test(expression)) {
+function evalString(expression) {
+  const operators = ["+", "-", "*", "/"];
+  const operatorCombos = ["++", "+-", "-+", "--", "**", "//", "/*", "/*", "+/", "-/", "*/", "/*"];
+
+  if (/^[+\-*/]/.test(expression)) {
+    throw new SyntaxError("Expression should not start with invalid operator");
+  }
+
+  if (/[+\-*/]$/.test(expression)) {
+    throw new SyntaxError("Expression should not end with invalid operator");
+  }
+
+  for (let i = 0; i < operatorCombos.length; i++) {
+    if (expression.includes(operatorCombos[i])) {
       throw new InvalidExprError();
     }
+  }
 
-    // Check for invalid starting operator
-    if (/^[+\-*/]/.test(expression)) {
-      throw new SyntaxError("Expression should not start with invalid operator");
-    }
+  const cleanedExpr = expression.replace(/\s/g, "");
 
-    // Check for invalid ending operator
-    if (/[+\-*/]$/.test(expression)) {
-      throw new SyntaxError("Expression should not end with invalid operator");
-    }
-
-    // Evaluate expression
-    const result = eval(expression);
-
-    // Check for OutOfRangeError
-    if (!Number.isInteger(result)) {
-      throw new OutOfRangeError(result);
-    }
-
-    alert(`Result: ${result}`);
-  } catch (error) {
-    if (error instanceof OutOfRangeError || error instanceof InvalidExprError) {
-      alert(`Error: ${error.message}`);
-    } else {
-      alert(`Syntax Error: ${error.message}`);
+  for (let i = 0; i < cleanedExpr.length; i++) {
+    if (!/^[0-9+\-*/]$/.test(cleanedExpr[i])) {
+      throw new OutOfRangeError();
     }
   }
+
+  return eval(expression);
 }
